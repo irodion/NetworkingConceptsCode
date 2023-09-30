@@ -38,7 +38,7 @@ static_assert(from_string_chars("16", 0, 2) == 16);
 constexpr auto could_be_ip4_address(std::string_view sv) noexcept -> bool {
     return std::count(std::begin(sv), std::end(sv), '.') == 3 &&
            std::count(std::begin(sv), std::end(sv), ':') <= 1 &&
-           std::all_of(std::begin(sv), std::end(sv), [](char c) { return std::isdigit(c) || c == '.'; });
+           std::all_of(std::begin(sv), std::end(sv), [](char c) { return std::isdigit(c) || c == '.' || c == ':'; });
 }
 
 // Check if the string could be an IP6 address
@@ -170,6 +170,15 @@ constexpr inline auto get_ip_integral_equivalent(const char* ip4_addr) noexcept 
  * @param output_buffer output buffer to store the formatted representation
  */
 constexpr inline auto get_abcd_ip_format(uint32_t ip4_addr, char* output_buffer) noexcept -> void {
+    if (output_buffer == nullptr) {
+        return;
+    }
+    
+    std::snprintf(output_buffer, __impl::IP4_STRING_SIZE, "%d.%d.%d.%d"
+                                   , (ip4_addr >> 24) & 0xFF
+                                   , (ip4_addr >> 16) & 0xFF
+                                   , (ip4_addr >> 8) & 0xFF
+                                   , ip4_addr & 0xFF);
 }
 
 }

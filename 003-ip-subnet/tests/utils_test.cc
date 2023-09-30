@@ -29,6 +29,13 @@ TEST(IsFormattedIP4Address, InValidAddresses) {
     EXPECT_FALSE(NetworkingConcepts::__impl::could_be_ip4_address("192.168.1.1/24"));
     EXPECT_FALSE(NetworkingConcepts::__impl::could_be_ip4_address("192.16&.1.1"));
     EXPECT_FALSE(NetworkingConcepts::__impl::could_be_ip4_address("192.168.a.1"));
+    EXPECT_FALSE(NetworkingConcepts::__impl::could_be_ip4_address("::"));
+    EXPECT_FALSE(NetworkingConcepts::__impl::could_be_ip4_address("::1"));
+    EXPECT_FALSE(NetworkingConcepts::__impl::could_be_ip4_address("::ffff:127.0.0.1"));
+    EXPECT_FALSE(NetworkingConcepts::__impl::could_be_ip4_address("::ffff:192.168.0.1"));
+    EXPECT_FALSE(NetworkingConcepts::__impl::could_be_ip4_address("2001:db8::ff00:42:8329"));
+    EXPECT_FALSE(NetworkingConcepts::__impl::could_be_ip4_address("fe80::1ff:fe23:4567:890a"));
+    EXPECT_FALSE(NetworkingConcepts::__impl::could_be_ip4_address("2001:0db8:85a3:0000:0000:8a2e:0370:7334"));
 }
 
 TEST(IsFormattedIP6Address, ValidAddresses) {
@@ -145,6 +152,7 @@ TEST(GetBroadcastAddressTest, TestCase3) {
     EXPECT_STREQ(output_buffer, expected_broadcast_address);
 }
 
+// Test get_ip_integral_equivalent
 TEST(GetIntegralEquivalentTest, TestCase1) {
     const char* ip_address{ "192.168.2.10" };
     uint32_t expected_integral_address{ 3232236042 };
@@ -158,6 +166,34 @@ TEST(GetIntegralEquivalentTest, TestCase2) {
     const auto result{ NetworkingConcepts::get_ip_integral_equivalent(ip_address) };
     EXPECT_EQ(result, expected_integral_address);
 }
-// Test get_ip_integral_equivalent
+// Test get_abcd_ip_format
+TEST(GetABCDIPFormatTest, TestCase1) {
+    char output_buffer[16];
+    uint32_t ip_address{ 3232236042 };
+    NetworkingConcepts::get_abcd_ip_format(ip_address, output_buffer);
+    EXPECT_STREQ(output_buffer, "192.168.2.10");
+}
+
+TEST(GetABCDIPFormatTest, TestCase2) {
+    char output_buffer[16];
+    uint32_t ip_address{ 167843594 };
+    NetworkingConcepts::get_abcd_ip_format(ip_address, output_buffer);
+    EXPECT_STREQ(output_buffer, "10.1.23.10");
+}
+
+TEST(GetABCDIPFormatTest, TestCase3) {
+    char output_buffer[16];
+    uint32_t ip_address{ 2058138165 };
+    NetworkingConcepts::get_abcd_ip_format(ip_address, output_buffer);
+    EXPECT_STREQ(output_buffer, "122.172.178.53");
+}
+
+TEST(GetABCDIPFormatTest, InvalidIPAddress) {
+    char output_buffer[16];
+    uint32_t ip_address{ 0 };
+    NetworkingConcepts::get_abcd_ip_format(ip_address, output_buffer);
+    EXPECT_STREQ(output_buffer, "0.0.0.0");
+}
+
 
 
