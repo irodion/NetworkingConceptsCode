@@ -34,6 +34,19 @@ static_assert(from_string_chars("001", 0, 3) == 1);
 static_assert(from_string_chars("1", 0, 1) == 1);
 static_assert(from_string_chars("16", 0, 2) == 16);
 
+// Check if the string could be an IP4 address
+constexpr auto could_be_ip4_address(std::string_view sv) noexcept -> bool {
+    return std::count(std::begin(sv), std::end(sv), '.') == 3 &&
+           std::count(std::begin(sv), std::end(sv), ':') <= 1 &&
+           std::all_of(std::begin(sv), std::end(sv), [](char c) { return std::isdigit(c) || c == '.'; });
+}
+
+// Check if the string could be an IP6 address
+constexpr auto could_be_ip6_address(std::string_view sv) noexcept -> bool {
+    return std::count(sv.begin(), sv.end(), ':') >= 2 &&
+           std::all_of(sv.begin(), sv.end(), [](char c) { return std::isxdigit(c) || c == ':' || c == '.'; });
+}
+
 // Convert a string_view (IPv4 address) to an integer array
 constexpr auto parse_ip_v4(std::string_view sv) noexcept -> ip4_int_t {
     ip4_int_t result = {};
@@ -105,8 +118,11 @@ auto bitset_to_ip4_octets(ip4_bitset_t bitset) noexcept -> ip4_int_t {
  * @param mask Mask
  * @param output_buffer pointer to the output buffer
  */
-inline auto get_broadcast_address(const char *ip_addr, char mask, char* output_buffer) noexcept -> void
-{
+inline auto get_broadcast_address(const char *ip_addr, char mask, char* output_buffer) noexcept -> void {
+    if(!__impl::could_be_ip4_address(std::string_view{ip_addr})) { 
+        return;
+    }
+
     // convert ip_addr to array of bytes
     const auto ip_parts{ __impl::parse_ip_v4(ip_addr) };
     const auto mask_bits{ __impl::ip4_mask_to_bitset(mask) };
@@ -126,8 +142,34 @@ inline auto get_broadcast_address(const char *ip_addr, char mask, char* output_b
  * @param ip4_addr 
  * @return ip4 bitset
  */
-constexpr inline auto get_ip_integral_equivalent(std::string_view ip4_addr) noexcept -> int {
-    return 0;
+constexpr inline auto get_ip_integral_equivalent(const char* ip4_addr) noexcept -> uint32_t {
+    
+    std::string_view ip4{ ip4_addr };
+
+    if (ip4.empty() || !__impl::could_be_ip4_address(ip4)) {
+        return 0;
+    }
+
+    const auto octets{ __impl::parse_ip_v4(ip4) };
+    uint32_t ipAddress{ 0 };
+
+    for (int i = 0; i < octets.size(); ++i) {
+        if (octets[i] > 255 || octets[i] < 0) {
+            return 0;
+        }
+        ipAddress |= (octets[i] << (24 - i * 8));
+    }
+
+    return ipAddress;
+}
+
+/**
+ * @brief Translate IPv4 address from integral to formatted representation
+ * 
+ * @param ip4_addr integral representation of IPv4 address
+ * @param output_buffer output buffer to store the formatted representation
+ */
+constexpr inline auto get_abcd_ip_format(uint32_t ip4_addr, char* output_buffer) noexcept -> void {
 }
 
 }
