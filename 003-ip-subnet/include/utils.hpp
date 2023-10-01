@@ -173,7 +173,7 @@ constexpr inline auto get_abcd_ip_format(uint32_t ip4_addr, char* output_buffer)
     if (output_buffer == nullptr) {
         return;
     }
-    
+
     std::snprintf(output_buffer, __impl::IP4_STRING_SIZE, "%d.%d.%d.%d"
                                    , (ip4_addr >> 24) & 0xFF
                                    , (ip4_addr >> 16) & 0xFF
@@ -181,4 +181,22 @@ constexpr inline auto get_abcd_ip_format(uint32_t ip4_addr, char* output_buffer)
                                    , ip4_addr & 0xFF);
 }
 
+/**
+ * @brief Get the network ID for the IPv4 address
+ * 
+ * @param ip4_addr 
+ * @param mask 
+ * @param output_buffer 
+ */
+constexpr inline auto get_network_id(const char* ip4_addr, uint32_t mask, char* output_buffer) noexcept -> void {
+    const auto bit_mask{ __impl::ip4_mask_to_bitset(mask) };
+    get_abcd_ip_format(get_ip_integral_equivalent(ip4_addr) & static_cast<uint32_t>(bit_mask.to_ulong()), output_buffer);
+}
+
+constexpr auto get_subnet_cardinality(char mask) noexcept -> uint32_t {
+    if (mask < 0 || mask > 32) {
+        return 0;
+    }
+    return static_cast<uint32_t>(std::pow(2, 32 - mask) - 2);
+}
 }

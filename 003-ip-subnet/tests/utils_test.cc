@@ -195,5 +195,36 @@ TEST(GetABCDIPFormatTest, InvalidIPAddress) {
     EXPECT_STREQ(output_buffer, "0.0.0.0");
 }
 
+TEST(GetNetworkIdTest, DefaultAddressAndMask) {
+    const char* ip_address{ "192.168.0.1" };
+    const char* expected_network_id{ "192.168.0.0" };
+    int mask = 24;
+    char output_buffer[16];
+    NetworkingConcepts::get_network_id(ip_address, mask, output_buffer);
+    EXPECT_STREQ(output_buffer, expected_network_id);
+}
+
+TEST(GetNetworkIdTest, TestCase1) {
+    const char* ip_address{ "192.168.2.10" };
+    const char* expected_network_id{ "192.168.2.0" };
+    int mask = 24;
+    char output_buffer[16];
+    NetworkingConcepts::get_network_id(ip_address, mask, output_buffer);
+    EXPECT_STREQ(output_buffer, expected_network_id);
+}
+
+TEST(GetNetworkIdTest, TestCase2) {
+    const char* ip_address{ "10.1.23.10" };
+    const char* expected_network_id{ "10.1.16.0" };
+    int mask = 20;
+    char output_buffer[16];
+    NetworkingConcepts::get_network_id(ip_address, mask, output_buffer);
+    EXPECT_STREQ(output_buffer, expected_network_id);
+}
+
+TEST(GetSubnetCardinalityTest, TestCase1) {
+    const auto cardinality{ NetworkingConcepts::get_subnet_cardinality(24) };
+    EXPECT_EQ(cardinality, 254);
+}
 
 
