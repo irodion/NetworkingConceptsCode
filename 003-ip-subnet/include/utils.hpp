@@ -199,4 +199,17 @@ constexpr auto get_subnet_cardinality(char mask) noexcept -> uint32_t {
     }
     return static_cast<uint32_t>(std::pow(2, 32 - mask) - 2);
 }
+
+/**
+ * @brief Check if ip address belongs to the network ID + mask combination
+ * 
+ * @param ip4_addr 
+ */
+constexpr inline auto check_ip_subnet_membership(const char* network_id, uint32_t mask, const char* ip4_addr) noexcept -> bool {
+    const auto bit_mask{ __impl::ip4_mask_to_bitset(mask) };
+    const auto ip4_integral_equivalent{ get_ip_integral_equivalent(ip4_addr) & static_cast<uint32_t>(bit_mask.to_ulong()) };
+    const auto network_id_integral_equivalent{ get_ip_integral_equivalent(network_id) };
+    return ip4_integral_equivalent == network_id_integral_equivalent;
+}
+
 }

@@ -227,4 +227,34 @@ TEST(GetSubnetCardinalityTest, TestCase1) {
     EXPECT_EQ(cardinality, 254);
 }
 
+TEST(CheckIP4SubnetMembershipTest, TestCase1) {
+    const char* ip_address{ "192.168.2.10" };
+    const char* network_id{ "192.168.2.0" };
+    uint32_t subnet_mask{ 24 };
+    const auto result{ NetworkingConcepts::check_ip_subnet_membership(network_id, subnet_mask, ip_address) };
+    EXPECT_TRUE(result);
+}
 
+TEST(CheckIP4SubnetMembershipTest, TestCase2) {
+    const char* ip_address{ "192.168.1.1" };
+    const char* network_id{ "192.168.1.0" };
+    uint32_t subnet_mask{ 24 };
+    const auto result{ NetworkingConcepts::check_ip_subnet_membership(network_id, subnet_mask, ip_address) };
+    EXPECT_TRUE(result);
+}
+
+TEST(CheckIP4SubnetMembershipTest, TestCase3) {
+    const char* ip_address{ "10.0.0.1" };
+    const char* network_id{ "10.0.0.0" };
+    uint32_t subnet_mask{ 8 };
+    const auto result{ NetworkingConcepts::check_ip_subnet_membership(network_id, subnet_mask, ip_address) };
+    EXPECT_TRUE(result);
+}
+
+TEST(CheckIP4SubnetMembershipTest, TestCase4) {
+    const char* ip_address{ "192.168.2.1" };
+    const char* network_id{ "192.168.1.0" };
+    uint32_t subnet_mask{ 24 };
+    const auto result{ NetworkingConcepts::check_ip_subnet_membership(network_id, subnet_mask, ip_address) };
+    EXPECT_FALSE(result);
+}
